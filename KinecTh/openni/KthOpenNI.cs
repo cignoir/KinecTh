@@ -25,6 +25,8 @@ namespace KinecTh
 
         int[] histogram;
         Bitmap bitmap;
+        Bitmap faceBmp;
+        Bitmap waitingBmp;
         bool shouldRun;
 
 
@@ -33,6 +35,10 @@ namespace KinecTh
         public KthOpenNI(MainForm mainForm)
         {
             this.mainForm = mainForm;
+            faceBmp = new Bitmap(Image.FromFile(@"data/face.bmp"));
+            waitingBmp = new Bitmap(Image.FromFile(@"data/waiting.bmp"));
+            waitingBmp.MakeTransparent(Color.White);
+
             context = new Context(Application.StartupPath + @"\data\config.xml");
             depthGenerator = context.FindExistingNode(NodeType.Depth) as DepthGenerator;
 
@@ -48,9 +54,10 @@ namespace KinecTh
             skeletonCapability.SetSkeletonProfile(SkeletonProfile.All);
         }
 
+        #region
         public void Reset()
         {
-            Thread.CurrentThread.Abort();
+            Exit();
             openNiThread = new Thread(new ThreadStart(ReaderThread));
             openNiThread.Start();
         }
@@ -69,13 +76,9 @@ namespace KinecTh
 
         public void Exit()
         {
-            if(openNiThread != null && openNiThread.IsAlive){
-                shouldRun = false;
-                openNiThread.Abort();
-                context.StopGeneratingAll();
-                context.Shutdown();
-            }
+            shouldRun = false;
         }
+        #endregion
 
         private unsafe void CalcHist(DepthMetaData depthMD)
         {
@@ -119,11 +122,9 @@ namespace KinecTh
 
         private bool shouldDrawPixels = true;
         private bool shouldDrawBackground = true;
-        private bool shouldPrintID = true;
-        private bool shouldPrintState = true;
-        private bool shouldDrawSkeleton = true;
 
-        private unsafe void ReaderThread()
+
+        private void ReaderThread()
         {
             DepthMetaData depthMD = new DepthMetaData();
 
@@ -136,126 +137,90 @@ namespace KinecTh
                 catch (Exception)
                 {
                 }
-
+                // 深度ヒストグラム描画
                 this.depthGenerator.GetMetaData(depthMD);
-
                 CalcHist(depthMD);
+                DrawHist(depthMD);
 
-                lock (this)
+                // 検出済みユーザの取得
+                var users = userGenerator.GetUsers();
+                if (users.Length != 0)
                 {
-                    Rectangle rect = new Rectangle(0, 0, this.bitmap.Width, this.bitmap.Height);
-                    BitmapData data = this.bitmap.LockBits(rect, ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                    uint user = GetActiveUser(users);
 
-
-                    if (this.shouldDrawPixels)
+                    if (skeletonCapability.IsTracking(user))
                     {
-                        ushort* pDepth = (ushort*)this.depthGenerator.GetDepthMapPtr().ToPointer();
-                        ushort* pLabels = (ushort*)this.userGenerator.GetUserPixels(0).SceneMapPtr.ToPointer();
+                        // ユーザが切り替わっていたらイメージ変更
+                        //if (IsUserSwitched(user, users)) {;};
 
-                        // set pixels
-                        for (int y = 0; y < depthMD.YRes; ++y)
-                        {
-                            byte* pDest = (byte*)data.Scan0.ToPointer() + y * data.Stride;
-                            for (int x = 0; x < depthMD.XRes; ++x, ++pDepth, ++pLabels, pDest += 3)
-                            {
-                                pDest[0] = pDest[1] = pDest[2] = 0;
+                        // オートショット
+                        if (Status.isKeyEnabled && Status.isAutoShot) KthAction.AutoShot();
 
-                                ushort label = *pLabels;
-                                if (this.shouldDrawBackground || *pLabels != 0)
-                                {
-                                    Color labelColor = Color.White;
-                                    if (label != 0)
-                                    {
-                                        labelColor = colors[label % ncolors];
-                                    }
-
-                                    byte pixel = (byte)this.histogram[*pDepth];
-                                    pDest[0] = (byte)(pixel * (labelColor.B / 256.0));
-                                    pDest[1] = (byte)(pixel * (labelColor.G / 256.0));
-                                    pDest[2] = (byte)(pixel * (labelColor.R / 256.0));
-                                }
-                            }
-                        }
+                        // 骨格情報取得
+                        var skeleton = GetSkeleton(user);
+                        // 骨格情報の信頼度チェック
+                        if (IsConfident(skeleton)) return;
+                        // ポーズ判定＋入力
+                        new Pose(skeleton).JudgeAndAction(skeleton);
                     }
-                    this.bitmap.UnlockBits(data);
-
-                    //Graphics g = Graphics.FromImage(this.bitmap);
-                    mainForm.pictureBox.Image = this.bitmap;
-                    // ゲームI/F
-                    Play();
-                    //g.Dispose();
                 }
-
-                mainForm.Invalidate();
             }
         }
 
-        //void Loop()
-        //{
-        //    while (shouldRun)
-        //    {
-        //        if (mainForm.IsDisposed)
-        //        {
-        //            break;
-        //        }
-                
-        //        try
-        //        {   
-        //            // 深度センサー用ジェネレータの更新待ち
-        //            this.context.WaitOneUpdateAll(depthGenerator);
-        //        }
-        //        catch (Exception)
-        //        {
-        //        }
-
-        //        // 検出済みユーザの取得
-        //        var users = userGenerator.GetUsers();
-        //        if(users.Length != 0){
-        //            uint user = GetActiveUser(users);
-                
-        //            if (skeletonCapability.IsTracking(user))
-        //            {
-        //                // ユーザが切り替わっていたらイメージ変更
-        //                //if (IsUserSwitched(user, users)) {;};
-                        
-        //                // オートショット
-        //                if(Status.isKeyEnabled && Status.isAutoShot) KthAction.AutoShot();
-
-        //                // 骨格情報取得
-        //                var skeleton = GetSkeleton(user);
-        //                // 骨格情報の信頼度チェック
-        //                if (IsConfident(skeleton)) continue;
-        //                // ポーズ判定＋入力
-        //                JudgeAndAction(skeleton);
-        //            }
-        //        }
-        //    }
-        //}
-
-        void Play()
+        private unsafe void DrawHist(DepthMetaData depthMD)
         {
-            // 検出済みユーザの取得
-            var users = userGenerator.GetUsers();
-            if (users.Length != 0)
+            lock (this)
             {
-                uint user = GetActiveUser(users);
+                Rectangle rect = new Rectangle(0, 0, this.bitmap.Width, this.bitmap.Height);
+                BitmapData data = this.bitmap.LockBits(rect, ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
-                if (skeletonCapability.IsTracking(user))
+
+                if (this.shouldDrawPixels)
                 {
-                    // ユーザが切り替わっていたらイメージ変更
-                    //if (IsUserSwitched(user, users)) {;};
+                    ushort* pDepth = (ushort*)this.depthGenerator.GetDepthMapPtr().ToPointer();
+                    ushort* pLabels = (ushort*)this.userGenerator.GetUserPixels(0).SceneMapPtr.ToPointer();
 
-                    // オートショット
-                    if (Status.isKeyEnabled && Status.isAutoShot) KthAction.AutoShot();
+                    // set pixels
+                    for (int y = 0; y < depthMD.YRes; ++y)
+                    {
+                        byte* pDest = (byte*)data.Scan0.ToPointer() + y * data.Stride;
+                        for (int x = 0; x < depthMD.XRes; ++x, ++pDepth, ++pLabels, pDest += 3)
+                        {
+                            pDest[0] = pDest[1] = pDest[2] = 0;
 
-                    // 骨格情報取得
-                    var skeleton = GetSkeleton(user);
-                    // 骨格情報の信頼度チェック
-                    if (IsConfident(skeleton)) return;
-                    // ポーズ判定＋入力
-                    new Pose(skeleton).JudgeAndAction(skeleton);
+                            ushort label = *pLabels;
+                            if (this.shouldDrawBackground || *pLabels != 0)
+                            {
+                                Color labelColor = Color.White;
+                                if (label != 0)
+                                {
+                                    labelColor = colors[label % ncolors];
+                                }
+
+                                byte pixel = (byte)this.histogram[*pDepth];
+                                pDest[0] = (byte)(pixel * (labelColor.B / 256.0));
+                                pDest[1] = (byte)(pixel * (labelColor.G / 256.0));
+                                pDest[2] = (byte)(pixel * (labelColor.R / 256.0));
+                            }
+                        }
+                    }
                 }
+                this.bitmap.UnlockBits(data);
+                //Bitmap mixed = MixImages(this.bitmap, this.waitingBmp, 0, 0, this.bitmap.Width, this.bitmap.Height);
+
+                mainForm.UpdateBitmap(new Bitmap(this.bitmap));
+                mainForm.histView.Invalidate();
             }
+        }
+
+        // 画像合成
+        Bitmap MixImages(Bitmap original, Bitmap mix, int x, int y, int width, int height)
+        {
+            Bitmap mixed = new Bitmap(original);
+            Graphics g = Graphics.FromImage(mixed);
+            g.DrawImage(mix, x, y, width, height);
+            g.Dispose();
+            return mixed;
         }
 
         uint GetActiveUser(uint[] users)
@@ -278,13 +243,13 @@ namespace KinecTh
 
         void SwitchPictureBoxView()
         {
-            if (mainForm.pictureBox.Visible)
+            if (mainForm.histView.Visible)
             {
-                mainForm.HidePic(mainForm.pictureBox);
+                mainForm.HidePic(mainForm.histView);
             }
             else
             {
-                mainForm.ShowPic(mainForm.pictureBox);
+                mainForm.ShowPic(mainForm.histView);
             }
         }
 
@@ -373,7 +338,7 @@ namespace KinecTh
             if (success)
             {
                 //成功したなら、トラッキング開始
-                mainForm.HidePic(mainForm.pictureBox);
+                mainForm.HidePic(mainForm.histView);
                 Status.isUserTracking = true;
                 skeletonCapability.StartTracking(id);
                 mainForm.Log(mainForm.consoleTextBox, "Calibration Success" + id);
@@ -381,7 +346,7 @@ namespace KinecTh
             else
             {
                 //失敗したなら、再度検出開始
-                mainForm.ShowPic(mainForm.pictureBox);
+                mainForm.ShowPic(mainForm.histView);
                 Status.isUserTracking = false;
                 poseDetectionCapability.StartPoseDetection(skeletonCapability.GetCalibrationPose(), id);
             }
