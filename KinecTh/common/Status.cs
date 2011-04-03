@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace KinecTh
 {
     class Status

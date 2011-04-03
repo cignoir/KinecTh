@@ -34,12 +34,12 @@ namespace KinecTh.common
                 Status.isKeyEnabled = !Status.isKeyEnabled;
                 if (Status.isKeyEnabled)
                 {
-                    Logger.log(mainForm.consoleTextBox, "[Key Input] - ON");
+                    Logger.Log(mainForm.consoleTextBox, "[Key Input] - ON");
                     AutoShot();
                 }
                 else
                 {
-                    Logger.log(mainForm.consoleTextBox, "[Key Input] - OFF");
+                    Logger.Log(mainForm.consoleTextBox, "[Key Input] - OFF");
                 }
             } else if(sender == hotKey_Z){
                 InputSimulator.SimulateKeyUp(VirtualKeyCode.MENU);
@@ -47,7 +47,7 @@ namespace KinecTh.common
                 InputSimulator.SimulateKeyPress(VirtualKeyCode.VK_Z);
                 Status.isAutoShot = !Status.isAutoShot;
                 AutoShot();
-                Logger.log(mainForm.consoleTextBox, "Press Z key");
+                Logger.Log(mainForm.consoleTextBox, "Press Z key");
             } else if(sender == hotKey_A){
                 InputSimulator.SimulateKeyUp(VirtualKeyCode.MENU);
                 InputSimulator.SimulateKeyUp(VirtualKeyCode.CONTROL);
@@ -55,11 +55,11 @@ namespace KinecTh.common
                 AutoShot();
                 if (Status.isAutoShot)
                 {
-                    Logger.log(mainForm.consoleTextBox, "[Auto Shot] - ON");
+                    Logger.Log(mainForm.consoleTextBox, "[Auto Shot] - ON");
                 }
                 else
                 {
-                    Logger.log(mainForm.consoleTextBox, "[Auto Shot] - OFF");
+                    Logger.Log(mainForm.consoleTextBox, "[Auto Shot] - OFF");
                 }
 
             }
@@ -67,10 +67,6 @@ namespace KinecTh.common
             {
                 mainForm.consoleTextBox.Text = "Initialized";
                 mainForm.consoleTextBox.ScrollToCaret();
-                var openNi = mainForm.GetOpenNI();
-                if(openNi != null){
-                    openNi.Reset();
-                }
             }
             else if (sender == hotKey_D)
             {
@@ -79,7 +75,7 @@ namespace KinecTh.common
             }
             else if (IsUserChanged(sender))
             {
-                Logger.log(mainForm.consoleTextBox, "[Active] - User" + Status.activeUser);
+                Logger.Log(mainForm.consoleTextBox, "[Active] - User" + Status.activeUser);
             }
             else
             {
@@ -154,7 +150,9 @@ namespace KinecTh.common
             for (int i = 0; i < Settings.MAX_USER_COUNT; i++ )
             {
                 hotKey_User[i].Dispose();
-            }            
+            }
+
+            this.mainForm = null;
         }
         
     }

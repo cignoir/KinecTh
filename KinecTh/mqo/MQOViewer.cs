@@ -323,41 +323,41 @@ public class MQOViewer : Scene
 
         if (this.pickedModel != null)
         {
-            gl.PushMatrix();
-            this.pickedModel.ApplyPosition(true);
+            //gl.PushMatrix();
+            //this.pickedModel.ApplyPosition(true);
 
-            gl.PushAttrib(AttribMask.LightingBit | AttribMask.LineBit);
-            gl.Disable(EnableCap.Lighting);
-            gl.LineWidth(2f);
+            //gl.PushAttrib(AttribMask.LightingBit | AttribMask.LineBit);
+            //gl.Disable(EnableCap.Lighting);
+            //gl.LineWidth(2f);
 
-            pickedModelAABBMaterial.Apply();
+            //pickedModelAABBMaterial.Apply();
 
-            this.pickedModel.DrawAABB(PrimitiveType.Line);
+            //this.pickedModel.DrawAABB(PrimitiveType.Line);
 
-            gl.Disable(EnableCap.DepthTest);
+            //gl.Disable(EnableCap.DepthTest);
 
-            gl.PointSize(5f);
-            gl.Color4(1f, 0f, 0f, 1f);
-            gl.Begin(BeginMode.Points);
-            gl.Vertex3(this.pickedObjectCoord);
-            gl.End();
+            //gl.PointSize(5f);
+            //gl.Color4(1f, 0f, 0f, 1f);
+            //gl.Begin(BeginMode.Points);
+            //gl.Vertex3(this.pickedObjectCoord);
+            //gl.End();
 
 
-            //選択したオブジェクト名と座標を表示する。
-            gl.Color4(1f, 1f, 1f, 1f);
-            gl.RasterPos3(this.pickedObjectCoord);
-            gl.Bitmap(0, 0, 0f, 0f, 15f, 0f, (byte[])null);
-            float textHeight = this.textFont.font.Height;
-            float textWidth = this.glyphDictionaly.DrawText(this.pickedModel.Name, this.textFont);
-            gl.Bitmap(0, 0, 0f, 0f, -textWidth, -textHeight, (byte[])null); //簡易的な改行
-            textWidth = this.glyphDictionaly.DrawText(this.pickedObjectCoord[0].ToString("f2") + "\n", this.textFont);
-            textWidth = this.glyphDictionaly.DrawText(this.pickedObjectCoord[1].ToString("f2") + "\n", this.textFont);
-            textWidth = this.glyphDictionaly.DrawText(this.pickedObjectCoord[2].ToString("f2"), this.textFont);
-            gl.Enable(EnableCap.DepthTest);
+            ////選択したオブジェクト名と座標を表示する。
+            //gl.Color4(1f, 1f, 1f, 1f);
+            //gl.RasterPos3(this.pickedObjectCoord);
+            //gl.Bitmap(0, 0, 0f, 0f, 15f, 0f, (byte[])null);
+            //float textHeight = this.textFont.font.Height;
+            //float textWidth = this.glyphDictionaly.DrawText(this.pickedModel.Name, this.textFont);
+            //gl.Bitmap(0, 0, 0f, 0f, -textWidth, -textHeight, (byte[])null); //簡易的な改行
+            //textWidth = this.glyphDictionaly.DrawText(this.pickedObjectCoord[0].ToString("f2") + "\n", this.textFont);
+            //textWidth = this.glyphDictionaly.DrawText(this.pickedObjectCoord[1].ToString("f2") + "\n", this.textFont);
+            //textWidth = this.glyphDictionaly.DrawText(this.pickedObjectCoord[2].ToString("f2"), this.textFont);
+            //gl.Enable(EnableCap.DepthTest);
 
-            gl.PopAttrib();
+            //gl.PopAttrib();
 
-            gl.PopMatrix();
+            //gl.PopMatrix();
         }
 
         ////////////////////////////////

@@ -3,8 +3,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using KinecTh;
-using KinecTh.common;
-using WindowsInput;
 
 
 public class HotKey : IDisposable
@@ -75,6 +73,8 @@ public class HotKey : IDisposable
                 UnregisterHotKey(this.Handle, id);
                 base.Dispose(disposing);
             } catch(ObjectDisposedException e){
+                Console.WriteLine(e.Message);
+            } catch(Exception e){
                 Console.WriteLine(e.Message);
             }
         }

@@ -29,15 +29,34 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.mqoView = new GLSharp.GLSControl();
             this.consoleTextBox = new System.Windows.Forms.TextBox();
-            this.histView = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.histView)).BeginInit();
+            this.panelView = new System.Windows.Forms.Panel();
+            this.mqoView = new GLSharp.GLSControl();
             this.SuspendLayout();
+            // 
+            // consoleTextBox
+            // 
+            this.consoleTextBox.BackColor = System.Drawing.Color.Black;
+            this.consoleTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.consoleTextBox.ForeColor = System.Drawing.Color.Fuchsia;
+            this.consoleTextBox.Location = new System.Drawing.Point(194, 372);
+            this.consoleTextBox.Multiline = true;
+            this.consoleTextBox.Name = "consoleTextBox";
+            this.consoleTextBox.Size = new System.Drawing.Size(188, 356);
+            this.consoleTextBox.TabIndex = 5;
+            this.consoleTextBox.Text = "Running...\r\n";
+            // 
+            // panelView
+            // 
+            this.panelView.Location = new System.Drawing.Point(6, 3);
+            this.panelView.Name = "panelView";
+            this.panelView.Size = new System.Drawing.Size(385, 363);
+            this.panelView.TabIndex = 6;
+            this.panelView.Visible = false;
             // 
             // mqoView
             // 
-            this.mqoView.Location = new System.Drawing.Point(12, 12);
+            this.mqoView.Location = new System.Drawing.Point(12, 372);
             this.mqoView.Name = "mqoView";
             this.mqoView.PixelFormat.AccumBits = ((byte)(64));
             this.mqoView.PixelFormat.AlphaBits = ((byte)(8));
@@ -50,31 +69,9 @@
             this.mqoView.PixelFormatAttribute.Acceleration = GLSharp.PFAAccelerationType.FullAcceleration;
             this.mqoView.PixelFormatAttribute.SampleBuffers = 0;
             this.mqoView.PixelFormatAttribute.Samples = 0;
-            this.mqoView.Size = new System.Drawing.Size(370, 292);
-            this.mqoView.TabIndex = 0;
-            // 
-            // consoleTextBox
-            // 
-            this.consoleTextBox.BackColor = System.Drawing.Color.Black;
-            this.consoleTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.consoleTextBox.ForeColor = System.Drawing.Color.Fuchsia;
-            this.consoleTextBox.Location = new System.Drawing.Point(12, 643);
-            this.consoleTextBox.Multiline = true;
-            this.consoleTextBox.Name = "consoleTextBox";
-            this.consoleTextBox.Size = new System.Drawing.Size(370, 85);
-            this.consoleTextBox.TabIndex = 5;
-            this.consoleTextBox.Text = "Running...\r\n";
-            // 
-            // histView
-            // 
-            this.histView.InitialImage = null;
-            this.histView.Location = new System.Drawing.Point(12, 310);
-            this.histView.Name = "histView";
-            this.histView.Size = new System.Drawing.Size(370, 327);
-            this.histView.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.histView.TabIndex = 6;
-            this.histView.TabStop = false;
-            this.histView.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox_Paint);
+            this.mqoView.Size = new System.Drawing.Size(176, 356);
+            this.mqoView.TabIndex = 8;
+            this.mqoView.Visible = false;
             // 
             // MainForm
             // 
@@ -83,9 +80,9 @@
             this.BackColor = System.Drawing.Color.Black;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.ClientSize = new System.Drawing.Size(394, 740);
-            this.Controls.Add(this.histView);
-            this.Controls.Add(this.consoleTextBox);
             this.Controls.Add(this.mqoView);
+            this.Controls.Add(this.panelView);
+            this.Controls.Add(this.consoleTextBox);
             this.DoubleBuffered = true;
             this.ForeColor = System.Drawing.SystemColors.ControlLight;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -95,7 +92,6 @@
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "KinecTh";
-            ((System.ComponentModel.ISupportInitialize)(this.histView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -103,9 +99,9 @@
 
         #endregion
 
-        public GLSharp.GLSControl mqoView;
         public System.Windows.Forms.TextBox consoleTextBox;
-        public System.Windows.Forms.PictureBox histView;
+        private System.Windows.Forms.Panel panelView;
+        private GLSharp.GLSControl mqoView;
     }
 }
 
